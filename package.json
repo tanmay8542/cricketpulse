@@ -1,0 +1,8 @@
+{
+  "name": "cricketpulse",
+  "version": "2.0.0",
+  "description": "CricketPulse: women's cricket fan platform (ICC x Ignyte hackathon)",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=22" }
+}
