@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem("cp_theme")||"dark"}catch(e){document.documentElement.dataset.theme="dark"}</script>
+<title>CricketPulse — Live Cricket</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--green:#087443;--green-dark:#04552f;--green-light:#e9f7ef;--red:#e63946;--orange:#f59e0b;--blue:#2563eb;--bg:#f3f5f7;--card:#fff;--text:#17202a;--muted:#6b7280;--border:#e5e7eb;--shadow:0 4px 18px rgba(0,0,0,.06)}
+body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+/* header */
+header{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.navbar{max-width:1250px;margin:auto;height:68px;display:flex;align-items:center;padding:0 20px;gap:20px}
+.logo{font-size:23px;font-weight:900;color:var(--green);white-space:nowrap;text-decoration:none}
+.logo span{color:#17202a}
+.nav-links{display:flex;gap:15px}
+.nav-links a{text-decoration:none;color:#555;font-size:13px;font-weight:700;transition:.2s}
+.nav-links a:hover,.nav-links a.active{color:var(--green)}
+.sbox{position:relative;margin-left:auto}
+.search{width:150px;padding:10px 15px;border:1px solid var(--border);border-radius:22px;outline:none;font-size:13px}
+.search:focus{border-color:var(--green)}
+.sr{position:absolute;top:46px;right:0;width:290px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);display:none;max-height:320px;overflow:auto}
+.sr a{display:flex;justify-content:space-between;gap:10px;padding:11px 14px;font-size:13px;font-weight:700;color:var(--text);text-decoration:none;border-bottom:1px solid #f0f1f3}
+.sr a:hover{background:var(--green-light)}
+.sr small{color:#9ca3af;font-size:10px;font-weight:800;white-space:nowrap}
+.menu{display:none;background:none;border:1px solid var(--border);border-radius:8px;font-size:18px;padding:5px 10px;cursor:pointer}
+/* hero */
+.hero{background:linear-gradient(120deg,#04552f,#087443 55%,#12955c);color:#fff}
+.hero-inner{max-width:1250px;margin:auto;padding:38px 20px}
+.hero-small{font-size:11px;letter-spacing:1.5px;font-weight:800;opacity:.8}
+.hero h1{font-size:34px;margin-top:7px}
+.hero p{margin-top:8px;opacity:.82;font-size:14px}
+/* layout */
+.container{max-width:1250px;margin:25px auto;padding:0 20px}
+.main-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,1fr);gap:20px}
+.stack>*+*{margin-top:20px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.card-header{padding:17px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:16px;font-weight:800}
+.more{font-size:10px;color:var(--green);font-weight:900;text-decoration:none}
+.live{display:flex;align-items:center;gap:6px;color:var(--red);font-size:11px;font-weight:900}
+.live-dot{width:7px;height:7px;background:var(--red);border-radius:50%}
+/* live match */
+.match-body{padding:23px}
+.match-series{color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px}
+.teams{display:grid;grid-template-columns:1fr 70px 1fr;align-items:center;text-align:center;margin:24px 0}
+.team-name{font-size:17px;font-weight:850}
+.team-flag{font-size:38px;display:block;margin-bottom:7px}
+.score{font-size:29px;font-weight:950;margin-top:7px}
+.overs{color:var(--muted);font-size:11px;margin-top:2px}
+.vs{color:#9ca3af;font-size:11px;font-weight:900}
+.match-status{background:var(--green-light);color:var(--green);border-radius:8px;padding:11px;text-align:center;font-size:13px;font-weight:800}
+.ball-row{display:flex;gap:8px;margin-top:16px;align-items:center}
+.ball-label{font-size:11px;color:var(--muted);margin-right:5px;font-weight:700}
+.ball{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:900;border:1px solid var(--border)}
+.ball.four{color:var(--blue);background:#eff6ff}
+.ball.six{color:#7c3aed;background:#f5f3ff}
+.ball.wicket{color:var(--red);background:#fff1f2}
+.tabs{display:flex;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:0 20px;gap:25px}
+.tab{background:none;border:none;padding:14px 0;cursor:pointer;font-size:12px;font-weight:800;color:var(--muted);border-bottom:2px solid transparent}
+.tab.active{color:var(--green);border-bottom-color:var(--green)}
+.commentary{padding:5px 0}
+.comment{padding:14px 20px;border-bottom:1px solid #f0f1f3}
+.comment:last-child{border-bottom:none}
+.over-number{color:var(--green);font-size:10px;font-weight:900;margin-bottom:5px}
+.comment-text{font-size:13px;line-height:1.5;color:#374151}
+.score-table{width:100%;border-collapse:collapse;font-size:12px}
+.score-table th{color:#9ca3af;font-size:10px;text-transform:uppercase;padding:12px 20px;background:#fafafa}
+.score-table td{padding:12px 20px;border-bottom:1px solid #f0f1f3}
+.score-table th:not(:first-child),.score-table td:not(:first-child){text-align:right}
+.score-table tr:last-child td{border-bottom:none}
+.scroll{overflow-x:auto}
+.player{font-weight:800}
+.player small{display:block;color:#9ca3af;font-size:9px;font-weight:500;margin-top:2px}
+.info{padding:20px;font-size:13px;line-height:1.8}
+/* fixtures & news */
+.fixture{display:block;color:inherit;text-decoration:none;padding:16px 18px;border-bottom:1px solid #f0f1f3}
+.fixture:last-child{border-bottom:none}
+a.fixture:hover{background:#fafafa}
+.fixture-meta{display:flex;justify-content:space-between;color:#9ca3af;font-size:10px;font-weight:800}
+.fixture-teams{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:13px;font-weight:800}
+.fixture-time{color:var(--green);font-size:11px}
+.fixture .res{margin-top:8px;font-size:11px;color:var(--muted);font-weight:700}
+.news-item{display:grid;grid-template-columns:70px 1fr;gap:12px;padding:15px 17px;border-bottom:1px solid #f0f1f3}
+.news-item:last-child{border-bottom:none}
+.news-image{width:70px;height:58px;border-radius:9px;background:linear-gradient(135deg,#d1fae5,#a7f3d0);display:grid;place-items:center;font-size:26px}
+.news-title{font-size:13px;font-weight:800;line-height:1.35}
+.news-time{display:block;margin-top:6px;color:#9ca3af;font-size:10px}
+.news-body{margin-top:6px;font-size:12px;line-height:1.55;color:#4b5563}
+/* sections */
+.section-title{margin:30px 0 14px;font-size:19px;font-weight:850}
+.three-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.two-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.mini-card{padding:19px}
+.badge{display:inline-block;background:var(--green-light);color:var(--green);padding:5px 7px;border-radius:5px;font-size:9px;font-weight:900;margin-bottom:10px}
+.badge.red{background:#fff1f2;color:var(--red)}
+.mini-card h3{font-size:15px;margin-bottom:8px}
+.mini-card p{color:var(--muted);font-size:12px;line-height:1.6}
+.mini-card .more{display:inline-block;margin-top:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{background:#fff;border:1px solid var(--border);border-radius:20px;padding:8px 15px;font-size:12px;font-weight:800;color:var(--muted);cursor:pointer}
+.chip.active{background:var(--green);border-color:var(--green);color:#fff}
+.form{display:flex;gap:5px;margin-top:12px}
+.form b{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:10px;color:#fff;background:var(--red)}
+.form b.W{background:var(--green)}
+.empty{padding:30px 20px;text-align:center;color:var(--muted);font-size:13px}
+footer{margin-top:40px;background:#111827;color:#9ca3af;padding:30px 20px}
+.footer-inner{max-width:1250px;margin:auto;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:12px;line-height:1.7}
+.footer-inner strong{color:#fff}
+.footer-inner a{color:#9ca3af;text-decoration:none;margin-right:14px}
+.footer-inner a:hover{color:#fff}
+.hero-inner{display:flex;align-items:center;justify-content:space-between;gap:30px}
+.hero-art{width:300px;flex:none}.hero-art svg{width:100%;display:block}
+.btn{display:inline-block;background:var(--green);color:#fff;border:1px solid var(--green);border-radius:22px;padding:11px 20px;font-size:13px;font-weight:800;cursor:pointer;text-decoration:none}
+.btn:hover{background:var(--green-dark)}.btn:disabled{opacity:.5;cursor:default}
+.btn.ghost{background:#fff;color:var(--green)}.btn.sm{padding:9px 16px}
+.av{width:38px;height:38px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-weight:900;text-decoration:none;flex:none}
+.av.big{width:84px;height:84px}.big{width:96px;height:96px}
+.fld{display:block;margin-bottom:14px;font-size:12px;font-weight:800;color:var(--muted)}
+.fld input,.chatf input{display:block;width:100%;margin-top:6px;padding:11px 14px;border:1px solid var(--border);border-radius:10px;font-size:14px;outline:none}
+.fld input:focus,.chatf input:focus{border-color:var(--green)}
+.err{color:var(--red);font-size:12px;font-weight:700;min-height:18px;margin-bottom:10px}
+.art{background:linear-gradient(120deg,#04552f,#12955c);color:#fff}.art p{color:#e9f7ef}
+.opt{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--border);border-radius:12px;padding:15px 18px;margin-top:10px;font-size:14px;font-weight:700;cursor:pointer;color:var(--text)}
+.opt:hover,.opt.on{border-color:var(--green);background:var(--green-light);color:var(--green)}
+.bar{height:8px;background:#eef0f2;border-radius:6px;overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;background:var(--green)}
+.msg{display:flex;gap:12px;padding:12px 20px;border-bottom:1px solid #f0f1f3}
+.msg b{font-size:12px;color:var(--green)}.msg small{color:#9ca3af;font-size:10px;margin-left:6px}.msg p{font-size:13px;margin-top:3px;overflow-wrap:anywhere}
+.chatbox{max-height:380px;overflow:auto}
+.chatf{display:flex;gap:10px;padding:14px 20px;border-top:1px solid var(--border)}.chatf input{margin:0}
+.bdgs{display:flex;flex-wrap:wrap;gap:16px;padding:20px}
+.bdg{display:grid;justify-items:center;gap:6px;font-size:11px;font-weight:800;width:72px;text-align:center}
+.bdg span{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--c);color:var(--c);background:#fff}
+.bdg span svg{width:26px;stroke:currentColor;stroke-width:1.8}.bdg.off{opacity:.35;filter:grayscale(1)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:15px 20px;border-bottom:1px solid #f0f1f3;font-size:13px}
+.row:last-child{border-bottom:none}.row small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+.pgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:0 23px 10px}
+.pgrid .opt{margin:0;text-align:center;padding:14px 0;font-size:16px;font-weight:900}
+.lock{padding:30px 20px;text-align:center}.lock svg{width:110px;margin:0 auto 12px;display:block}
+#acct{display:flex}
+.hero{position:relative;overflow:hidden}.hero-inner{position:relative}
+.hero-inner.rich{min-height:300px;padding:45px 20px}
+.hero-text{position:relative;z-index:3;max-width:580px}
+.hero-inner.rich h1{font-size:42px;line-height:1.05;letter-spacing:-1.5px;margin-top:10px}
+.hero-inner.rich p{max-width:500px;line-height:1.6}
+.player-svg{position:absolute;right:80px;bottom:-20px;width:260px;height:290px;z-index:2;animation:pf 4s ease-in-out infinite}
+@keyframes pf{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.stadium{position:absolute;right:-30px;bottom:-80px;width:500px;opacity:.22}
+.ball-animation{position:absolute;right:360px;top:55px;width:22px;height:22px;background:#fff;border-radius:50%;z-index:4;animation:bf 3.5s ease-in-out infinite;box-shadow:0 0 15px rgba(255,255,255,.8)}
+@keyframes bf{0%{transform:translate(0,80px)}50%{transform:translate(100px,-30px)}100%{transform:translate(230px,100px)}}
+@keyframes pulse{50%{opacity:.3;transform:scale(.7)}}.live-dot{animation:pulse 1.3s infinite}
+.trophy{display:flex;align-items:center;gap:15px;padding:18px}.trophy svg{width:55px;height:65px;flex:none}
+.tbtn{background:none;border:1px solid var(--border);border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:16px;color:var(--text);flex:none}
+html[data-theme=dark]{--green:#22d3ee;--green-dark:#06b6d4;--green-light:rgba(34,211,238,.12);--red:#ff5d6c;--bg:#08121e;--card:#0e1f33;--text:#e8f1fa;--muted:#8da2b8;--border:rgba(255,255,255,.09);--shadow:0 6px 24px rgba(0,0,0,.35);color-scheme:dark;
+body{background:radial-gradient(1100px 600px at 70% -10%,#12365a 0,transparent 60%),#08121e;background-attachment:fixed}
+header,.sr,.nav-links.open{background:rgba(8,18,30,.94)}
+header{backdrop-filter:blur(10px)}
+.logo span{color:#fff}
+.nav-links a{color:#a9bbcd}.nav-links a:hover,.nav-links a.active{color:var(--green)}
+.search,.fld input,.chatf input{background:rgba(255,255,255,.05);color:var(--text)}
+.sr a{color:var(--text);border-color:var(--border)}.sr a:hover{background:var(--green-light)}
+.hero{background:linear-gradient(120deg,#06182b,#0b3a63 60%,#0e5a8f)}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015)),var(--card)}
+.score-table th{background:rgba(255,255,255,.04)}
+.score-table td,.comment,.fixture,.news-item,.msg,.row,.chatf{border-color:var(--border)}
+.comment-text,.news-body{color:#c3d1df}
+a.fixture:hover{background:rgba(255,255,255,.04)}
+.news-image{background:linear-gradient(135deg,#12395a,#0d6a8a)}
+.match-status{border:1px solid rgba(34,211,238,.25)}
+.ball{background:rgba(255,255,255,.04)}.ball.four{background:rgba(37,99,235,.2);color:#7fb0ff}.ball.six{background:rgba(124,58,237,.22);color:#c4a5ff}.ball.wicket{background:rgba(255,93,108,.18);color:#ff8791}
+.chip,.opt{background:rgba(255,255,255,.04);color:var(--text)}
+.chip.active,.btn{background:linear-gradient(90deg,#00d4ff,#27a2ff);border-color:transparent;color:#04141f}
+.btn:hover{background:linear-gradient(90deg,#27a2ff,#00d4ff)}
+.btn.ghost{background:transparent;color:var(--green);border:1px solid var(--green)}
+.opt:hover,.opt.on{background:var(--green-light);border-color:var(--green);color:var(--green)}
+.bdg span{background:var(--card)}.bar{background:rgba(255,255,255,.1)}
+.badge.red{background:rgba(255,93,108,.15)}
+.art{background:linear-gradient(120deg,#06182b,#0e5a8f)}.art p{color:#c3d1df}
+footer{background:#050c14}}
+.wheel svg{width:100%;max-width:300px;display:block;margin:0 auto 16px;color:var(--text)}.wheel path{cursor:pointer}.wp{width:100%;color:var(--text)}.fld input[type=range]{padding:0;border:0;accent-color:var(--green)}
+@media(max-width:850px){
+.hero-art{display:none}.pgrid{padding:0 18px 10px}.player-svg{right:-30px;opacity:.45}.stadium{right:-180px}.hero-inner.rich h1{font-size:31px}.ball-animation{right:40%}
+.menu{display:block}
+.nav-links{display:none}
+.nav-links.open{display:flex;flex-direction:column;gap:16px;position:absolute;top:68px;left:0;right:0;background:#fff;padding:18px 20px;border-bottom:1px solid var(--border)}
+.navbar{gap:12px}.search{width:150px}
+.main-grid,.three-grid,.two-grid{grid-template-columns:1fr}
+.hero h1{font-size:27px}}
+@media(max-width:500px){
+.player-svg{width:200px;right:-60px}.hero-inner.rich{min-height:280px}
+.search{width:115px}.sr{width:250px}
+.teams{grid-template-columns:1fr 45px 1fr}
+.score{font-size:23px}.team-name{font-size:14px}.team-flag{font-size:30px}
+.ball-row{gap:5px}.ball{width:27px;height:27px}
+.tabs{gap:16px}.score-table th,.score-table td{padding:12px 10px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}.player-svg,.ball-animation,.live-dot{animation:none}}
+</style>
+</head>
+<body>
+<header><nav class="navbar">
+<a class="logo" href="#/" style="display:flex;align-items:center;gap:8px"><svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="#e63946"/><path d="M6 9c5 3 5 11 0 14M26 9c-5 3-5 11 0 14" stroke="#fff" stroke-width="1.6" fill="none"/></svg>Cricket<span>Pulse</span></a>
+<div class="nav-links" id="nav"></div>
+<div class="sbox"><input class="search" id="q" type="text" placeholder="🔎 Search cricket" aria-label="Search cricket" autocomplete="off"><div class="sr" id="sr"></div></div>
+<button class="tbtn" id="theme" aria-label="Switch light or dark theme"></button>
+<div id="acct"></div>
+<button class="menu" id="menu" aria-label="Menu">☰</button>
+</nav></header>
+<div id="app"></div>
+<footer><div class="footer-inner">
+<div><strong>CricketPulse</strong> &nbsp;— Your cricket, one place.<br>Sample data only. Next-Gen Fan Experiences for women's cricket • ICC x Ignyte Hackathon.</div>
+<div id="fnav"></div>
+</div></footer>
+
+<script>
+/* ============ DATA (replace with your API) ============ */
+const T={IND:['India Women','🇮🇳'],AUS:['Australia Women','🇦🇺'],ENG:['England Women','🏴'],SA:['South Africa Women','🇿🇦'],NZ:['New Zealand Women','🇳🇿'],PAK:['Pakistan Women','🇵🇰'],MI:['Mumbai','🏏'],DC:['Delhi','🏏']};
+const FM=['T20I','ODI','League'];
+const M=[
+{s:'live',fmt:'T20I',lb:'2nd T20I',a:'IND',b:'AUS',d:'Today'},
+{s:'up',fmt:'T20I',lb:'3rd T20I',a:'IND',b:'AUS',d:'Tomorrow',t:'7:30 PM'},
+{s:'up',fmt:'ODI',lb:'1st ODI',a:'ENG',b:'SA',d:'Oct 7',t:'1:30 PM'},
+{s:'up',fmt:'League',lb:'League Match',a:'MI',b:'DC',d:'Oct 8',t:'7:30 PM'},
+{s:'up',fmt:'ODI',lb:'1st ODI',a:'NZ',b:'PAK',d:'Oct 11',t:'9:30 AM'},
+{s:'done',fmt:'T20I',lb:'1st T20I',a:'IND',b:'AUS',d:'Oct 2',r:'India Women won by 6 wickets'},
+{s:'done',fmt:'ODI',lb:'3rd ODI',a:'NZ',b:'PAK',d:'Sep 29',r:'Pakistan Women won by 41 runs'},
+{s:'done',fmt:'League',lb:'League Match',a:'DC',b:'MI',d:'Sep 28',r:'Mumbai won by 5 wickets'}];
+const CM=[['18.2 • FOUR','Beautifully timed through extra cover. The fielder had no chance and India move closer to the target.'],['18.1 • 1 RUN','Worked gently into the leg side. They come back comfortably for one.'],['17.6 • SIX','That is massive! Picked up over mid-wicket and cleared the boundary with ease.'],['17.5 • DOT BALL','Good length delivery outside off. Defended straight back to the bowler.']];
+const SC=[['Smriti Mandhana *','not out',72,41,7,3,'175.6'],['Harmanpreet Kaur *','not out',34,18,4,1,'188.9'],['Jemimah Rodrigues','c Healy b Schutt',28,17,2,2,'164.7'],['Shafali Verma','c Perry b Gardner',31,25,3,1,'124.0']];
+const N=[['🏏','Match','India Women finish strongly after a thrilling middle-overs battle','18 minutes ago','Two quick wickets slowed the chase, but a calm partnership kept India Women ahead of the rate.'],['🔥','Match',"Mandhana's fearless knock changes the momentum",'42 minutes ago','Forty-one balls, 72 runs and a switch in tempo that Australia Women never answered.'],['📊','Analysis',"Five numbers that define tonight's contest",'1 hour ago','Powerplay scoring, death-over economy and boundary percentage tell the story.'],['⭐','Analysis','Who could be player of the match?','2 hours ago','Three players are in the frame as the chase enters its final overs.'],['🌱','Features','What the next generation of fans wants','Yesterday','Younger fans want to take part, not just watch: predict, chat and belong.'],['📅','Fixtures','England Women and South Africa Women set for opening ODI','Yesterday','The three-match series begins on Oct 7 with a 1:30 PM start.'],['🏆','League',"Mumbai go top of the Women's T20 League",'2 days ago','A fourth win in five matches sends them to eight points.'],['🎯','Features','The art of bowling at the death','3 days ago','Yorkers, slower balls and field placements: how top bowlers close out an innings.']];
+const SE=[['T20I','India Women vs Australia Women','Oct 2 – Oct 5','LIVE','India Women lead 1–0 after the 1st T20I. The 2nd T20I is in progress at Wankhede Stadium, Mumbai.'],['ODI','England Women vs South Africa Women','Oct 7 – Oct 14','UPCOMING','Three ODIs. The opener is on Oct 7 at 1:30 PM.'],['League',"Women's T20 League",'Sep 28 – Oct 25','LIVE','Mumbai lead the table with 8 points. Delhi are second.'],['ODI','New Zealand Women vs Pakistan Women','Oct 11 – Oct 20','UPCOMING','Three ODIs. The first begins on Oct 11 at 9:30 AM.']];
+const PT=[['Mumbai',5,4,1,'+0.82',8],['Delhi',5,3,2,'+0.31',6],['Bengaluru',5,2,3,'-0.12',4],['Gujarat',5,2,3,'-0.40',4],['UP',5,1,4,'-0.61',2]];
+const R={T20I:{Teams:[['IND',271],['AUS',264],['ENG',259],['SA',251],['NZ',246]],Batters:[['Smriti Mandhana','IND',782],['Beth Mooney','AUS',771],['Laura Wolvaardt','SA',748],['Nat Sciver-Brunt','ENG',730]],Bowlers:[['Sophie Ecclestone','ENG',790],['Deepti Sharma','IND',764],['Megan Schutt','AUS',742],['Marizanne Kapp','SA',721]]},
+ODI:{Teams:[['AUS',122],['IND',118],['ENG',113],['SA',109],['NZ',105]],Batters:[['Smriti Mandhana','IND',812],['Laura Wolvaardt','SA',790],['Beth Mooney','AUS',774],['Nat Sciver-Brunt','ENG',760]],Bowlers:[['Sophie Ecclestone','ENG',750],['Alana King','AUS',725],['Deepti Sharma','IND',718],['Marizanne Kapp','SA',700]]}};
+const PL=[['Smriti Mandhana','IND','Batter',412,0,'51.5'],['Harmanpreet Kaur','IND','Batter',356,0,'44.5'],['Jemimah Rodrigues','IND','Batter',289,0,'36.1'],['Deepti Sharma','IND','All-rounder',241,13,'30.1'],['Renuka Singh Thakur','IND','Bowler',22,19,'14.2'],['Ellyse Perry','AUS','All-rounder',298,12,'37.3'],['Alyssa Healy','AUS','Wicketkeeper',204,0,'29.1'],['Beth Mooney','AUS','Batter',367,0,'45.9'],['Megan Schutt','AUS','Bowler',31,16,'18.4'],['Nat Sciver-Brunt','ENG','All-rounder',334,11,'41.8'],['Sophie Ecclestone','ENG','Bowler',44,21,'16.0'],['Laura Wolvaardt','SA','Batter',389,0,'48.6']];
+const FORM={IND:'WWLWW',AUS:'LWWLL',ENG:'WLWWL',SA:'WWLLW',NZ:'LWLWW',PAK:'WLLWL'};
+const NAV=[['','Home'],['matches','Matches'],['series','Series'],['news','News'],['rankings','Rankings'],['teams','Teams'],['players','Players'],['match-lab','Match Lab'],['fan-zone','Fan Zone'],['predict','Predict'],['rewards','Rewards']];
+
+/* ============ HELPERS ============ */
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const fl=c=>T[c]?T[c][1]+' '+T[c][0]:c;
+const hero=(k,h,p,rich)=>`<section class="hero"><div class="hero-inner${rich?' rich':''}"><div class="hero-text"><div class="hero-small">${k}</div><h1>${h}</h1><p>${p}</p></div>${rich?IC.stadium+'<div class="ball-animation"></div>'+IC.player:`<div class="hero-art">${IC.field}</div>`}</div></section>`;
+const card=(t,b,r='')=>`<div class="card"><div class="card-header"><div class="card-title">${t}</div>${r}</div>${b}</div>`;
+const page=(h,b)=>h+`<main class="container">${b}</main>`;
+const chips=(a,cur,k)=>`<div class="chips">${a.map(x=>`<button class="chip${x==cur?' active':''}" data-k="${k}" data-v="${x}">${x}</button>`).join('')}</div>`;
+const table=(head,rows)=>`<div class="scroll"><table class="score-table"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((c,i)=>`<td${i==0?' class="player"':''}>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+const S={mt:'Live',fmt:'All',rf:'T20I',rc:'Teams',role:'All',nc:'All'};
+
+const fix=m=>{
+ const mid=m.s=='live'?'<span class="live"><span class="live-dot"></span>LIVE</span>':m.s=='up'?m.t:'FT';
+ const inner=`<div class="fixture-meta"><span>${m.lb}</span><span>${m.s=='live'?'Today':m.d}</span></div><div class="fixture-teams"><span>${fl(m.a)}</span><span class="fixture-time">${mid}</span><span>${fl(m.b)}</span></div>${m.r?`<div class="res">${m.d} • ${m.r}</div>`:''}`;
+ return m.s=='live'?`<a class="fixture" href="#/match">${inner}</a>`:`<div class="fixture">${inner}</div>`;
+};
+const ball=(c,k='')=>`<span class="ball ${k}">${c}</span>`;
+const batters=()=>card('Current Batters',table(['Batter','R','B','4s','6s'],SC.slice(0,2).map(r=>[r[0],r[2],r[3],r[4],r[5]])),'<span style="font-size:11px;color:#9ca3af">18.2 overs</span>');
+const mc=()=>card('Live Match','<div class="match-body"><div class="match-series">T20 International • 2nd T20I</div><div class="teams"><div class="team-name"><span class="team-flag">🇮🇳</span>India Women<div class="score">184/4</div><div class="overs">18.2 overs</div></div><div class="vs">VS</div><div class="team-name"><span class="team-flag">🇦🇺</span>Australia Women<div class="score">178/7</div><div class="overs">20.0 overs</div></div></div><div class="match-status">India Women need 5 runs from 10 balls</div><div class="ball-row"><span class="ball-label">LAST 7</span>'+ball(1)+ball(4,'four')+ball(0)+ball('W','wicket')+ball(2)+ball(6,'six')+ball(1)+'</div></div>'
++`<div class="tabs">${[['commentary','Commentary'],['scorecard','Scorecard'],['info','Match Info']].map((t,i)=>`<button class="tab${i?'':' active'}" data-t="${t[0]}">${t[1]}</button>`).join('')}</div>`
++`<div id="commentary" class="commentary">${CM.map(c=>`<div class="comment"><div class="over-number">${c[0]}</div><div class="comment-text">${c[1]}</div></div>`).join('')}</div>`
++`<div id="scorecard" style="display:none">${table(['Batter','R','B','4s','6s','SR'],SC.map(r=>[`${r[0]}<small>${r[1]}</small>`,...r.slice(2)]))}</div>`
++'<div id="info" class="info" style="display:none"><strong>Venue:</strong> Wankhede Stadium, Mumbai<br><strong>Series:</strong> Australia Women tour of India<br><strong>Toss:</strong> India Women won the toss and elected to bat<br><strong>Match:</strong> 2nd T20 International<br><strong>Umpires:</strong> Richard Illingworth, Kumar Dharmasena</div>','<div class="live"><span class="live-dot"></span>LIVE</div>');
+const upc=n=>card('Upcoming Matches',M.filter(m=>m.s=='up').slice(0,n).map(fix).join(''),'<a class="more" href="#/matches">VIEW ALL</a>');
+const nitem=(n,full)=>`<div class="news-item"><div class="news-image">${n[0]}</div><div><div class="news-title">${n[2]}</div>${full?`<div class="news-body">${n[4]}</div>`:''}<span class="news-time">${n[1]} • ${n[3]}</span></div></div>`;
+const newsCard=()=>card('Top Stories',N.slice(0,4).map(n=>nitem(n)).join(''),'<a class="more" href="#/news">MORE</a>');
+const mini=(b,t,p,l,h)=>`<div class="card mini-card"><span class="badge">${b}</span><h3>${t}</h3><p>${p}</p><a class="more" href="${h}">${l}</a></div>`;
+
+/* ============ PAGES ============ */
+const P={
+home:()=>page(hero("WOMEN'S CRICKET • LIVE • FAST","Women's cricket,<br>made for fans.",'Live scores, predictions, fan squads and the stories behind the game.',1),
+`<div class="main-grid"><section class="stack">${mc()}${batters()}</section><aside class="stack">${fy()}${upc(3)}${newsCard()}</aside></div>
+<h2 class="section-title">Explore Cricket</h2><div class="three-grid">
+${mini('SERIES','India Women vs Australia Women','1 T20I completed<br>2nd T20I live<br><strong>India lead 1–0</strong>','ALL SERIES','#/series')}
+${mini('RANKINGS',"Women's T20I Rankings",R.T20I.Teams.slice(0,3).map((t,i)=>['🥇','🥈','🥉'][i]+' '+T[t[0]][0]).join('<br>')+'<br>Top batter: '+R.T20I.Batters[0][0],'FULL RANKINGS','#/rankings')}
+${mini('POINTS TABLE','Women\'s T20 League',PT.slice(0,3).map((r,i)=>`${i+1}. ${r[0]} — ${r[5]} pts`).join('<br>'),'FULL TABLE','#/series')}</div><h2 class="section-title">Next-gen fan experiences</h2><div class="three-grid">${mini('PERSONALISATION','Your fan type',gi('star','#7c3aed')+'A quick quiz tunes your feed, team and challenges.','TAKE THE QUIZ','#/discover')}${mini('INTERACTIVE','Match Lab',gi('target','#2563eb')+'Tap the wagon wheel and scrub the win probability.','OPEN MATCH LAB','#/match-lab')}${mini('COMMUNITY','Fan Zone and squads',gi('chat','#22d3ee')+'Chat, join watch parties and back your squad.','OPEN FAN ZONE','#/fan-zone')}${mini('GAMIFICATION','Predict and earn',gi('flame','#f59e0b')+'Next-ball predictions, quests and badges.','START PREDICTING','#/predict')}${mini('IMMERSIVE','Live match centre',gi('trophy','#e63946')+'Ball-by-ball commentary, scorecard and shot maps in one place.','OPEN MATCH CENTRE','#/match')}</div><div class="card trophy" style="margin-top:20px">${IC.trophy}<div><h3 style="font-size:15px;margin-bottom:5px">The game never stops.</h3><p style="font-size:12px;color:var(--muted);line-height:1.5">Follow every run, wicket, milestone and moment with CricketPulse.</p></div></div>`),
+
+matches:()=>{
+ const f=m=>(S.fmt=='All'||m.fmt==S.fmt)&&m.s=={Live:'live',Upcoming:'up',Results:'done'}[S.mt];
+ const l=M.filter(f);
+ return page(hero('MATCHES','Scores, fixtures and results','Follow every match across T20I, ODI, Test and league cricket.'),
+ chips(['Live','Upcoming','Results'],S.mt,'mt')+chips(['All',...FM],S.fmt,'fmt')+card(S.mt,l.length?l.map(fix).join(''):`<div class="empty">No ${S.mt.toLowerCase()} ${S.fmt=='All'?'':S.fmt+' '}matches right now. Try another tab or format.</div>`));
+},
+match:()=>page(hero('MATCH CENTRE','India Women vs Australia Women','2nd T20I • Wankhede Stadium, Mumbai'),`<div class="main-grid"><section class="stack">${mc()}${batters()}</section><aside class="stack">${upc(3)}</aside></div>`),
+
+series:()=>page(hero('SERIES','Series and tournaments','Every ongoing and upcoming series, with the latest table.'),
+`<div class="two-grid">${SE.map(s=>`<div class="card mini-card"><span class="badge${s[3]=='LIVE'?' red':''}">${s[3]} • ${s[0]}</span><h3>${s[1]}</h3><p><strong>${s[2]}</strong><br>${s[4]}</p></div>`).join('')}</div>
+<h2 class="section-title">Women\'s T20 League — Points Table</h2>${card('Standings',table(['Team','P','W','L','NRR','Pts'],PT))}`),
+
+news:()=>{
+ const c=['All',...new Set(N.map(n=>n[1]))],l=N.filter(n=>S.nc=='All'||n[1]==S.nc);
+ return page(hero('NEWS','Cricket news and analysis','Match reports, analysis and features.'),chips(c,S.nc,'nc')+`<div class="two-grid">${l.map(n=>card(n[1],nitem(n,1))).join('')}</div>`);
+},
+rankings:()=>{
+ const rows=R[S.rf][S.rc].map((e,i)=>S.rc=='Teams'?[i+1,fl(e[0]),e[1]]:[i+1,e[0],fl(e[1]),e[2]]);
+ return page(hero('RANKINGS',"Women's rankings",'Team, batter and bowler ratings by format.'),
+ chips(['T20I','ODI'],S.rf,'rf')+chips(['Teams','Batters','Bowlers'],S.rc,'rc')+
+ card(`${S.rf} ${S.rc}`,table(S.rc=='Teams'?['#','Team','Rating']:['#','Player','Team','Rating'],rows)));
+},
+teams:()=>page(hero('TEAMS','International teams','Ratings and recent form.'),
+`<div class="three-grid">${['IND','AUS','ENG','SA','NZ','PAK'].map(c=>{const r=f=>{const i=R[f].Teams.findIndex(t=>t[0]==c);return i<0?'–':R[f].Teams[i][1]};
+return `<div class="card mini-card"><div class="team-flag">${T[c][1]}</div><h3>${T[c][0]}</h3><p>T20I ${r('T20I')} • ODI ${r('ODI')}</p><div class="form">${[...FORM[c]].map(x=>`<b class="${x}">${x}</b>`).join('')}</div></div>`}).join('')}</div>`),
+players:()=>{
+ const l=PL.filter(p=>S.role=='All'||p[2]==S.role);
+ return page(hero('PLAYERS','Players','2026 season form. Sample figures.'),chips(['All','Batter','Bowler','All-rounder','Wicketkeeper'],S.role,'role')+
+ card('Player form',table(['Player','Team','Role','Runs','Wkts','Avg'],l.map(p=>[p[0],fl(p[1]),p[2],p[3],p[4],p[5]]))));
+}};
+
+/* ============ ACCOUNT, INTERACTION PAGES & SVG ============ */
+const svg=(v,b)=>`<svg viewBox="${v}" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${b}</svg>`;
+const GL={flame:'<path d="M12 3c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z"/>',target:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/>',chat:'<path d="M4 5h16v11H9l-5 4z"/>',star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',trophy:'<path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 20h8"/>'};
+const IC={
+ball:svg('0 0 32 32','<circle cx="16" cy="16" r="13" fill="#e63946"/><path d="M6 9c5 3 5 11 0 14M26 9c-5 3-5 11 0 14" stroke="#fff" stroke-width="1.6"/>'),
+stumps:svg('0 0 64 64','<path d="M20 16v38M32 16v38M44 16v38" stroke="#087443" stroke-width="4"/><path d="M18 12h12M34 12h12" stroke="#f59e0b" stroke-width="3"/><circle cx="50" cy="52" r="7" fill="#e63946"/>'),
+field:svg('0 0 360 220','<ellipse cx="180" cy="120" rx="165" ry="92" fill="#fff" fill-opacity=".1" stroke="#fff" stroke-opacity=".5" stroke-width="2"/><ellipse cx="180" cy="120" rx="105" ry="56" stroke="#fff" stroke-opacity=".4" stroke-dasharray="4 6" stroke-width="2"/><rect x="164" y="76" width="32" height="88" rx="4" fill="#fff" fill-opacity=".22"/><path d="M172 82V68M180 82V68M188 82V68M172 158v14M180 158v14M188 158v14" stroke="#fff" stroke-width="3"/><path d="M60 188C130 40 250 30 300 70" stroke="#f59e0b" stroke-width="3" stroke-dasharray="2 8"/><circle cx="300" cy="70" r="10" fill="#e63946"/><path d="M294 66c4 2 4 8 0 10" stroke="#fff" stroke-width="1.5"/>')};
+Object.assign(IC,{
+stadium:'<svg class="stadium" viewBox="0 0 600 300" aria-hidden="true"><ellipse cx="300" cy="245" rx="285" ry="65" fill="#fff"/><ellipse cx="300" cy="235" rx="190" ry="40" fill="none" stroke="#fff" stroke-width="7"/><path d="M60 225Q300 60 540 225" fill="none" stroke="#fff" stroke-width="10"/><path d="M90 220Q300 95 510 220" fill="none" stroke="#fff" stroke-width="6"/><circle cx="300" cy="220" r="35" fill="#fff"/></svg>',
+player:'<svg class="player-svg" viewBox="0 0 260 300" aria-hidden="true"><ellipse cx="125" cy="285" rx="65" ry="10" fill="rgba(0,0,0,.25)"/><path d="M112 180L100 265M145 180L170 260" stroke="#fff" stroke-width="18" stroke-linecap="round"/><path d="M91 263Q110 258 120 270L80 278ZM158 260Q175 255 188 269L158 275Z" fill="#17202a"/><path d="M95 105Q130 88 164 110L153 190Q125 202 98 188Z" fill="#f4f7f8"/><path d="M101 115L155 132L151 148L98 131Z" fill="#087443"/><path d="M110 62Q80 70 90 108" stroke="#17202a" stroke-width="10" fill="none" stroke-linecap="round"/><circle cx="132" cy="72" r="27" fill="#b96f45"/><path d="M105 72Q108 35 140 38Q164 42 160 72Z" fill="#17202a"/><path d="M150 70L178 80" stroke="#17202a" stroke-width="5"/><path d="M105 116Q78 100 65 72M153 118Q180 100 194 73" stroke="#b96f45" stroke-width="15" stroke-linecap="round" fill="none"/><path d="M185 68L220 18" stroke="#c58b45" stroke-width="13" stroke-linecap="round"/><path d="M216 20L229 8" stroke="#17202a" stroke-width="8" stroke-linecap="round"/></svg>',
+trophy:'<svg viewBox="0 0 100 120" aria-hidden="true"><path d="M30 15H70V55Q70 80 50 88Q30 80 30 55Z" fill="#f5b942"/><path d="M30 25H10Q10 55 30 60M70 25H90Q90 55 70 60" fill="none" stroke="#f5b942" stroke-width="8"/><rect x="43" y="82" width="14" height="20" fill="#f5b942"/><rect x="25" y="100" width="50" height="9" rx="3" fill="#f5b942"/></svg>'});
+const gi=(k,c)=>`<div class="bdg" style="--c:${c};width:auto;justify-items:start;margin-bottom:10px"><span>${svg('0 0 24 24',GL[k])}</span></div>`;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let USER=null;try{USER=JSON.parse(localStorage.getItem('cp_user'))}catch(e){}
+const save=()=>{try{USER?localStorage.setItem('cp_user',JSON.stringify(USER)):localStorage.removeItem('cp_user')}catch(e){}};
+const xp=n=>{USER.xp+=n;save()},lvl=()=>Math.floor(USER.xp/100)+1,lname=()=>['Curious Fan','Club Regular','Match Analyst','Cricket Legend'][Math.min(lvl()-1,3)];
+Object.assign(S,{am:'Log in',fz:'Live Chat',q:0,ans:[],pick:'',joined:[]});
+const CH=[['CricketQueen','12:07 am','What a shot!'],['SixerFan','12:08 am','India Women are on fire today!'],['BoundaryBoss','12:09 am','That was a stunning catch!'],['SpinStar','12:11 am','The spin bowling has been incredible today.']];
+const LB=[['CricketQueen',640],['SixerFan',520],['BoundaryBoss',410],['WicketWatcher',380],['SpinStar',255]];
+const QZ=[['When watching a match, what excites you most?',['Big sixes and boundaries 💥','Clever tactics and strategy 🧠','Team spirit and celebrations 🎉','Underdog comebacks 🔥']],['What is your ideal match day?',['A run-fest under lights 💡','A tense low-scoring thriller 😬','Watching with friends 🍿','A last-ball upset ⚡']],['Which moment do you remember most?',['A huge six 🚀','A smart bowling change 🎯','The team huddle 🤝','A great chase from behind 🏃']]];
+const TY=[['Power Player','You love bold moves and big moments: the thrill of a six and the roar of the crowd.'],['Tactician','You watch the plan behind every ball: field settings, bowling changes and match-ups.'],['Team Spirit','You love the shared moments: the celebrations, the huddles and the stands.'],['Underdog Fan','You back the comeback. The bigger the odds, the better the story.']];
+const gate=(k,h,p,f)=>page(hero(k,h,p),USER?f():`<div class="card lock">${IC.stumps}<h3>Log in to continue</h3><p style="color:var(--muted);font-size:13px;margin:8px 0 16px">This page needs an account so your points and badges are saved.</p><a class="btn" href="#/login">Log in or sign up</a></div>`);
+const bdg=()=>[['flame','#f59e0b','Top Play',USER.preds.some(p=>p.ok)],['target','#2563eb','Predictor',USER.preds.length>=5],['chat','#087443','Fan Zone',USER.msgs>0],['star','#7c3aed','Fan Type',!!USER.type],['trophy','#e63946','Legend',lvl()>=4]];
+Object.assign(P,{
+login:()=>{const su=S.am=='Sign up';return page(hero('ACCOUNT',su?'Create your account':'Welcome back','Predict every ball, chat with fans and earn rewards.'),
+`<div class="two-grid">${card(S.am,`<div class="match-body">${chips(['Log in','Sign up'],S.am,'am')}<form id="af" novalidate>${su?'<label class="fld">Name<input name="name" autocomplete="name"></label>':''}<label class="fld">Email<input name="email" type="email" autocomplete="email"></label><label class="fld">Password<input name="pw" type="password" autocomplete="${su?'new':'current'}-password"></label><div class="err" id="err" role="alert"></div><button class="btn">${su?'Create account':'Log in'}</button></form></div>`)}<div class="card mini-card art">${IC.field}<h3 style="margin-top:14px">Predict. Chat. Climb.</h3><p>Make next-ball predictions, join the Fan Zone and unlock badges.</p></div></div>`)},
+discover:()=>gate('DISCOVER','Find your fan type','Three quick questions to personalise your account.',()=>{
+ if(S.q<3){const q=QZ[S.q];return card(`Question ${S.q+1} of 3`,`<div class="match-body"><div class="bar"><i style="width:${S.q/3*100}%"></i></div><h3 style="margin-top:18px">${q[0]}</h3>${q[1].map((o,i)=>`<button class="opt" data-act="ans" data-i="${i}">${o}</button>`).join('')}</div>`)}
+ const t=TY.find(x=>x[0]==USER.type)||TY[0];
+ return card('Your result',`<div class="match-body" style="text-align:center"><div class="big" style="margin:0 auto">${IC.ball}</div><h2 style="margin-top:12px">You're a ${t[0]}</h2><p style="color:var(--muted);font-size:13px;margin:8px auto 18px;max-width:420px">${t[1]}</p><div class="match-series">Pick your team</div><div class="chips" style="justify-content:center;margin:10px 0 18px">${['IND','AUS','ENG','SA','NZ','PAK'].map(c=>`<button class="chip${USER.team==c?' active':''}" data-act="team" data-v="${c}">${fl(c)}</button>`).join('')}</div><a class="btn" href="#/profile">Continue</a></div>`)}),
+'fan-zone':()=>{let b;
+ if(S.fz=='Live Chat')b=card('Live Chat',`<div class="chatbox">${CH.map(m=>`<div class="msg"><span class="av" style="width:32px;height:32px;font-size:12px">${esc(m[0][0]).toUpperCase()}</span><div><b>${esc(m[0])}</b><small>${m[1]}</small><p>${esc(m[2])}</p></div></div>`).join('')}</div><form class="chatf" id="cf"><input name="m" maxlength="140" aria-label="Message" placeholder="${USER?'Cheer for your team…':'Log in to join the chat'}"${USER?'':' disabled'}><button class="btn">${USER?'Send':'Log in'}</button></form>`,'<div class="live"><span class="live-dot"></span>LIVE</div>');
+ else if(S.fz=='Leaderboard'){const L=[...LB];if(USER)L.push([USER.name+' (you)',USER.xp]);L.sort((a,b)=>b[1]-a[1]);b=card('Top fans',table(['#','Fan','Points'],L.map((r,i)=>[i+1,esc(r[0]),r[1]])))}
+ else if(S.fz=='Squads')b=card('Fan squads',Object.keys(T).slice(0,6).map(c=>`<div class="row"><div><b>${fl(c)}</b><small>Back your team and climb the squad table</small></div><button class="btn sm${S.joined.includes('sq'+c)?' ghost':''}" data-act="join" data-v="sq${c}">${S.joined.includes('sq'+c)?'Joined':'Join squad'}</button></div>`).join(''));
+ else b=card('Watch Parties',[['India Women vs Australia Women • 2nd T20I','Live now'],['England vs South Africa • 1st ODI','Oct 7, 1:30 PM'],['MI vs CSK','Oct 8, 7:30 PM']].map(p=>`<div class="row"><div><b>${p[0]}</b><small>${p[1]}</small></div><button class="btn sm${S.joined.includes(p[0])?' ghost':''}" data-act="join" data-v="${p[0]}">${S.joined.includes(p[0])?'Joined':'Join'}</button></div>`).join(''));
+ return page(hero('FAN ZONE','Cheer with other fans','Chat during matches, climb the leaderboard and join watch parties.'),chips(['Live Chat','Leaderboard','Watch Parties','Squads'],S.fz,'fz')+b)},
+predict:()=>gate('PREDICT','Predict the next ball','Pick an outcome and lock it in. Correct picks earn 25 points, any pick earns 5.',()=>{
+ const h=USER.preds.slice(-5).reverse(),l=S.last;
+ return `<div class="main-grid"><section>${card('India Women vs Australia Women • 18.2 overs',`<div class="match-body"><div class="match-status">India Women need 5 runs from 10 balls</div></div><div class="pgrid">${['0','1','2','4','6','W'].map(o=>`<button class="opt${S.pick==o?' on':''}" data-pick="${o}">${o}</button>`).join('')}</div><div class="match-body"><button class="btn" data-act="lock"${S.pick?'':' disabled'}>Lock prediction</button>${l?`<p class="match-series" style="margin-top:14px">${l.ok?'Correct':'Not this time'}: you picked ${l.p} and the ball was ${l.o}. ${l.ok?'+25':'+5'} points.</p>`:''}</div>`)}</section><aside>${card('Your recent picks',h.length?h.map(p=>`<div class="row"><span>You picked ${p.p}</span><b style="color:var(--${p.ok?'green':'red'})">${p.o} • ${p.ok?'Correct':'Missed'}</b></div>`).join(''):`<div class="empty">${IC.stumps.replace('<svg','<svg width="64"')}<br>No picks yet. Choose an outcome to start.</div>`)}</aside></div>`}),
+rewards:()=>gate('REWARDS','Your rewards','Level up by predicting, chatting and taking the quiz.',()=>{
+ const Q=[['Prediction Master','Make 5 ball predictions',USER.preds.length,5],['Cricket Scholar','Take the fan type quiz',USER.type?1:0,1],['Fan Zone Explorer','Send a message in the Fan Zone',Math.min(USER.msgs,1),1]];
+ return card(`Level ${lvl()} • ${lname()}`,`<div class="match-body"><b>${USER.xp} points</b><div class="bar"><i style="width:${USER.xp%100}%"></i></div><p class="overs">${100-USER.xp%100} points to the next level</p></div>`)+'<h2 class="section-title">Quests</h2>'+card('Quests',Q.map(q=>`<div class="row"><div><b>${q[0]}</b><small>${q[1]}</small><div class="bar" style="width:220px;max-width:60vw"><i style="width:${Math.min(q[2]/q[3],1)*100}%"></i></div></div><b style="color:var(--green)">${Math.min(q[2],q[3])}/${q[3]}</b></div>`).join(''))+'<h2 class="section-title">Badges</h2>'+card('Badges',`<div class="bdgs">${bdg().map(b=>`<div class="bdg${b[3]?'':' off'}" style="--c:${b[1]}"><span>${svg('0 0 24 24',GL[b[0]])}</span>${b[2]}</div>`).join('')}</div>`)}),
+profile:()=>gate('PROFILE','Your profile','Account and fan details.',()=>card('Account',`<div class="row"><span class="av big" style="font-size:36px">${esc(USER.name[0]).toUpperCase()}</span><div style="flex:1"><b style="font-size:18px">${esc(USER.name)}</b><small>${esc(USER.email)}</small></div></div>${[['Level',`${lvl()} • ${lname()}`],['Points',USER.xp],['Fan type',USER.type||'Not set'],['Favourite team',USER.team?fl(USER.team):'Not set'],['Predictions',USER.preds.length]].map(r=>`<div class="row"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('')}<div class="row"><a class="btn ghost sm" href="#/discover" data-act="again">Retake quiz</a><button class="btn sm" data-act="out">Log out</button></div>`))});
+document.addEventListener('submit',e=>{e.preventDefault();const f=e.target;
+ if(f.id=='af'){const v=n=>f.elements[n]?f.elements[n].value.trim():'',em=v('email'),pw=v('pw'),nm=v('name'),su=S.am=='Sign up';
+  const bad=!/^\S+@\S+\.\S+$/.test(em)?'Enter a valid email address.':pw.length<6?'Use a password with at least 6 characters.':su&&!nm?'Enter your name.':'';
+  if(bad){$('#err').textContent=bad;return}
+  USER={name:nm||em.split('@')[0],email:em,team:'',type:'',xp:0,preds:[],msgs:0};save();location.hash=su?'#/discover':'#/profile';render()}
+ if(f.id=='cf'){const v=f.elements.m.value.trim();if(!USER){location.hash='#/login';return}if(!v)return;
+  CH.push([USER.name,new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}),v]);USER.msgs++;xp(5);render();const c=$('.chatbox');c.scrollTop=c.scrollHeight;$('#cf input').focus()}});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act],[data-pick]');if(!b)return;const d=b.dataset;
+ if(d.pick){S.pick=d.pick;render();return}
+ if(d.act=='lock'){const o=['0','0','0','1','1','1','2','4','6','W'][Math.random()*10|0],ok=o==S.pick;USER.preds.push({p:S.pick,o,ok});xp(ok?25:5);S.last={p:S.pick,o,ok};S.pick='';render()}
+ if(d.act=='ans'){S.ans.push(+d.i);S.q++;if(S.q>=3){const c=[0,0,0,0];S.ans.forEach(i=>c[i]++);const i=c.indexOf(Math.max(...c));if(!USER.type)USER.xp+=50;USER.type=TY[i][0];save()}render()}
+ if(d.act=='zone'){S.zone=+d.v;render()}
+ if(d.act=='team'){USER.team=d.v;save();render()}
+ if(d.act=='again'){S.q=0;S.ans=[];render()}
+ if(d.act=='join'){const i=S.joined.indexOf(d.v);i<0?S.joined.push(d.v):S.joined.splice(i,1);render()}
+ if(d.act=='out'){USER=null;save();S.q=0;S.ans=[];location.hash='#/login';render()}});
+
+const th=()=>{$('#theme').textContent=document.documentElement.dataset.theme=='dark'?'☀':'☾'};
+$('#theme').onclick=()=>{const n=document.documentElement.dataset.theme=='dark'?'light':'dark';document.documentElement.dataset.theme=n;try{localStorage.setItem('cp_theme',n)}catch(e){}th()};th();
+const FY={'Power Player':['Boundary watch','See where the runs are coming from in Match Lab','#/match-lab'],'Tactician':['Tactics board','Replay how the chase swung over by over','#/match-lab'],'Team Spirit':['Watch parties','Join a watch party for the next match','#/fan-zone'],'Underdog Fan':['Comeback stories','Read about chases from behind','#/news']};
+const fy=()=>{if(!USER||!USER.type)return card('For you',`<div class="empty">Take the 3-question fan quiz to personalise your matches, stories and challenges.<br><br><a class="btn sm" href="#/${USER?'discover':'login'}">${USER?'Take the quiz':'Log in to personalise'}</a></div>`);
+ const x=FY[USER.type],m=USER.team&&M.find(m=>m.s!='done'&&(m.a==USER.team||m.b==USER.team));
+ return card('For you • '+USER.type,`<a class="fixture" href="${x[2]}"><b>${x[0]}</b><div class="res">${x[1]}</div></a>${m?`<a class="fixture" href="#/matches"><b>Your team next</b><div class="res">${fl(m.a)} vs ${fl(m.b)} • ${m.d} ${m.t||''}</div></a>`:''}<a class="fixture" href="#/fan-zone"><b>Fan squads</b><div class="res">Join a squad and climb the table.</div></a>`)};
+const Z=['Third man','Point','Cover','Long off','Long on','Mid-wicket','Square leg','Fine leg'],WD={'Smriti Mandhana':[4,12,16,10,8,14,6,2],'Harmanpreet Kaur':[2,4,6,5,3,8,4,2]},WP=[50,52,49,47,50,55,53,51,48,50,46,44,47,52,58,55,60,68,74];
+Object.assign(S,{lb:'Smriti Mandhana',zone:2});
+const wx=i=>10+i*280/18,wy=i=>100-WP[i]*.9;
+const wheel=(d,z)=>{const mx=Math.max(...d),pt=(a,q)=>[150+q*Math.cos(a),150+q*Math.sin(a)];
+ return svg('0 0 300 300',d.map((v,i)=>{const a0=(i*45-112.5)*Math.PI/180,q=40+v/mx*105,A=pt(a0,q),B=pt(a0+Math.PI/4,q);return `<path role="button" aria-label="${Z[i]}, ${v} runs" data-act="zone" data-v="${i}" d="M150 150L${A}A${q} ${q} 0 0 1 ${B}Z" fill="#22d3ee" fill-opacity="${i==z?.95:.2+.4*v/mx}" stroke="currentColor" stroke-opacity=".4"/>`}).join('')+'<circle cx="150" cy="150" r="120" stroke="currentColor" stroke-opacity=".3"/><rect x="144" y="120" width="12" height="60" rx="3" fill="currentColor" fill-opacity=".25"/>')};
+P['match-lab']=()=>{const d=WD[S.lb],t=d.reduce((a,b)=>a+b),z=S.zone;
+ return page(hero('MATCH LAB','Explore the match','Tap the wagon wheel and drag the slider to replay how the chase swung.'),
+ `<div class="two-grid">${card('Wagon wheel',`<div class="match-body">${chips(Object.keys(WD),S.lb,'lb')}<div class="wheel">${wheel(d,z)}</div><div class="match-status">${Z[z]}: ${d[z]} of ${t} runs (${Math.round(d[z]/t*100)}%)</div></div>`)}${card('Win probability',`<div class="match-body"><svg viewBox="0 0 300 110" class="wp" aria-hidden="true"><path d="M10 55H290" stroke="currentColor" stroke-opacity=".3" stroke-dasharray="4 4"/><polyline fill="none" stroke="#22d3ee" stroke-width="2.5" points="${WP.map((v,i)=>wx(i)+','+wy(i)).join(' ')}"/><circle id="wpc" r="5" fill="#e63946" cx="${wx(18)}" cy="${wy(18)}"/></svg><label class="fld">Over of the chase<input id="ov" type="range" min="0" max="18" value="18"></label><div class="match-status" id="wpt">Over 19: India Women 74% • Australia Women 26%</div></div>`)}</div>`)};
+document.addEventListener('input',e=>{if(e.target.id!='ov')return;const i=+e.target.value;$('#wpc').setAttribute('cx',wx(i));$('#wpc').setAttribute('cy',wy(i));$('#wpt').textContent=`Over ${i+1}: India Women ${WP[i]}% • Australia Women ${100-WP[i]}%`});
+/* ============ ROUTER & EVENTS ============ */
+const cur=()=>(location.hash.replace(/^#\/?/,'')||'').split('/')[0];
+function render(){
+ const r=cur(),k=P[r||'home']?r||'home':'home';
+ $('#app').innerHTML=P[k]();
+ $$('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.r==(k=='home'?'':k=='match'?'matches':k)));
+ $('#nav').classList.remove('open');
+ $('#acct').innerHTML=USER?`<a class="av" href="#/profile" title="Profile">${esc(USER.name[0]).toUpperCase()}</a>`:'<a class="btn sm" href="#/login">Log in</a>';
+ document.title='CricketPulse — '+(k=='home'?'Live Cricket':k[0].toUpperCase()+k.slice(1).replace('-',' '));
+}
+$('#nav').innerHTML=NAV.map(n=>`<a href="#/${n[0]}" data-r="${n[0]}">${n[1]}</a>`).join('');
+$('#fnav').innerHTML=NAV.map(n=>`<a href="#/${n[0]}">${n[1]}</a>`).join('');
+addEventListener('hashchange',()=>{render();scrollTo(0,0)});
+$('#menu').onclick=()=>$('#nav').classList.toggle('open');
+document.addEventListener('click',e=>{
+ const c=e.target.closest('.chip');if(c){S[c.dataset.k]=c.dataset.v;render();return}
+ const t=e.target.closest('.tab');
+ if(t){$$('.tab').forEach(b=>b.classList.toggle('active',b==t));['commentary','scorecard','info'].forEach(id=>$('#'+id).style.display=id==t.dataset.t?'block':'none')}
+ if(!e.target.closest('.sbox'))$('#sr').style.display='none';
+});
+/* search */
+const IDX=[...PL.map(p=>[p[0],'Player','players']),...Object.keys(T).slice(0,6).map(c=>[T[c][0],'Team','teams']),...N.map(n=>[n[2],'News','news']),...SE.map(s=>[s[1],'Series','series'])];
+$('#q').oninput=e=>{
+ const v=e.target.value.trim().toLowerCase(),box=$('#sr');
+ if(v.length<2){box.style.display='none';return}
+ const h=IDX.filter(x=>x[0].toLowerCase().includes(v)).slice(0,8);
+ box.innerHTML=h.length?h.map(x=>`<a href="#/${x[2]}" onclick="$('#q').value='';$('#sr').style.display='none'">${x[0]}<small>${x[1]}</small></a>`).join(''):'<div class="empty">No results. Try a player, team or series name.</div>';
+ box.style.display='block';
+};
+render();
+</script>
+</body>
+</html>
